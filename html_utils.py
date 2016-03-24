@@ -2,15 +2,12 @@
 # coding=UTF-8
 import os
 import sys
-import time
 import json
 import gzip
-import socket
 import urllib2
 import cStringIO
 
 from lxml import etree
-from lxml.etree import _ElementStringResult
 
 __author__ = 'matrix.lisp@gmail.com'
 
@@ -42,7 +39,7 @@ def get_html_content(url):
     except Exception, e:
         if isinstance(e, urllib2.HTTPError):
             message = 'http error: %s' % (e.__str__())
-        elif isinstance(e, urllib2.URLError) and isinstance(e.reason, socket.timeout):
+        elif isinstance(e, urllib2.URLError):
             message = 'socket error: %s' % (e.__str__())
         else:
             message = 'misc error: %s' % (e.__str__())
@@ -156,42 +153,19 @@ def transform(community_data, ak, city):
     """
     根据小区名称获取地理位置信息并构建热力图所需的数据格式
     :param community_data:
+    :param ak
+    :param city
     :return:
     """
     points = []
-    print len(community_data)
-    idx = 0
-    f = file('points.data', 'w')
-    points_data = load_points()
     for name, price in community_data.iteritems():
-        idx += 1
-        print idx, name, price
-        if points_data.get(str(name)) is not None:
-            print 'find'
-            continue
-        # time.sleep(0.1)
         obj = get_coordinate(name, ak, city)
         if obj is None:
             continue
         if obj['status'] != 0:
-            print obj
             continue
         d = obj['result']['location']
-        # print d
         d['price'] = round(int(price)/1000.0, 2)
         points.append(d)
-        f.write(name + '\t' + json.dumps(d) + '\n')
-        if idx % 10 == 0:
-            f.flush()
-    f.close()
-    with open('doc/js/points.js', 'w') as jsfile:
-        jsfile.write('var points = ' + json.dumps(points) + ';')
-
-
-def load_points():
-    points = {}
-    for line in file('data/points.txt'):
-        name = line.split('\t')[0]
-        # print name, type(name)
-        points[name] = 1
-    return points
+    with open('doc/js/points.js', 'w') as js_file:
+        js_file.write('var points = ' + json.dumps(points) + ';')

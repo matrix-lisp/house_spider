@@ -3,7 +3,7 @@
 from house_spider import CityModel
 from html_utils import transform
 
-__author__ = 'matrix'
+__author__ = 'matrix.lisp@gmail.com'
 
 
 def init():
@@ -31,26 +31,26 @@ def process():
     city_model.save()
 
 
-def test():
+def create_js_data():
     index_url = 'http://bj.ganji.com/xiaoqu'
     create_new = False
     city_model = CityModel(index_url=index_url, create_new=create_new)
 
-    ak = 'Gngv8fFQ63xtivWZaZzGOGM8'
+    ak = ''
     city = '北京市'
     transform(city_model.community_data, ak, city)
 
-    # for area in city_model.area_data.keys():
-    #     temp_data = city_model.subarea_data[area]
-    #     print area
-    #     for subarea, url in temp_data.iteritems():
-    #         print '\t', subarea, url
 
-    # for name, price in city_model.community_data.iteritems():
-    #     print name, type(name), price
+def main():
+    # 初始化, 完成基础数据的抓取
+    init()
+
+    # 抓取小区信息
+    process()
+
+    # 根据小区位置生成热力图所需的js文件
+    create_js_data()
 
 
 if __name__ == '__main__':
-    # init()
-    # process()
-    test()
+    main()
